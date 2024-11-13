@@ -28,7 +28,10 @@ export default function Home() {
   return (
     <main className="container mx-auto p-4 min-h-screen bg-white dark:bg-gray-800 text-black dark:text-white">
       <section id="years" className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">Years</h2>
+        <h1 className="text-2xl font-bold mb-4">Program - Song List</h1>
+        <h5 className="text-lg font-semibold mb-4">
+          Select a year to view the available repertoire
+        </h5>
         <Suspense fallback={<LoadingSpinner />}>
           <YearList
             onYearSelect={(year) => {
@@ -41,7 +44,7 @@ export default function Home() {
 
       {selectedYear && (
         <section id="months" ref={monthsRef} className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Months</h2>
+          <h2 className="text-lg font-semibold mb-4">Select a month</h2>
           <Suspense fallback={<LoadingSpinner />}>
             <MonthList
               year={selectedYear}
@@ -56,7 +59,7 @@ export default function Home() {
 
       {selectedMonth !== null && (
         <section id="dates" ref={datesRef} className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Dates</h2>
+          <h2 className="text-lg font-semibold mb-4">Select a date</h2>
           <Suspense fallback={<LoadingSpinner />}>
             <DateList
               year={selectedYear!}
@@ -72,7 +75,9 @@ export default function Home() {
 
       {selectedDate && (
         <section id="songs" ref={songsRef} className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Songs</h2>
+          <h2 className="text-lg font-semibold mb-4">
+            Select a song to view the available part recordings
+          </h2>
           <Suspense fallback={<LoadingSpinner />}>
             <SongList date={selectedDate} />
           </Suspense>
