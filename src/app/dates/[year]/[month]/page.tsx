@@ -34,5 +34,3 @@ export default async function DatePage({ params }: PageProps) {
     </div>
   );
 }
-
-export const runtime = "edge";
