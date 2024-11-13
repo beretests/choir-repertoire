@@ -157,11 +157,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import RecordingList from "./RecordingList";
+import { list } from "postcss";
 
 interface Song {
   id: string;
   songbook_name: string;
-  song_number: number;
+  song_number: string;
   song_name: string;
 }
 
