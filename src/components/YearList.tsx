@@ -64,27 +64,26 @@ interface YearListProps {
 export default function YearList({ onYearSelect }: YearListProps) {
   const [years, setYears] = useState<number[]>([]);
 
-  useEffect(() => {
-    async function fetchYears() {
-      const { data, error } = await supabase
-        .from("schedules")
-        .select("schedule_date")
-        .order("schedule_date");
+  async function fetchYears() {
+    const { data, error } = await supabase
+      .from("schedules")
+      .select("schedule_date")
+      .order("schedule_date");
 
-      if (error) {
-        console.error("Error fetching years:", error);
-        return;
-      }
-
-      const uniqueYears = [
-        ...new Set(
-          data.map((item) => new Date(item.schedule_date).getFullYear())
-        ),
-      ];
-      console.log("Unique years: ", uniqueYears);
-      setYears(uniqueYears);
+    if (error) {
+      console.error("Error fetching years:", error);
+      return;
     }
 
+    const uniqueYears = [
+      ...new Set(
+        data.map((item) => new Date(item.schedule_date).getFullYear())
+      ),
+    ];
+    console.log("Unique years: ", uniqueYears);
+    setYears(uniqueYears);
+  }
+  useEffect(() => {
     fetchYears();
   }, []);
 
