@@ -11,9 +11,11 @@ export default {
     extend: {
       backgroundColor: {
         dark: '#1a202c',
+        light: '#f8f9fa',
       },
       textColor: {
         dark: '#e2e8f0',
+        light: '#1a202c',
       },
     },
   },

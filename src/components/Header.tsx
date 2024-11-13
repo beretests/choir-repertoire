@@ -10,7 +10,7 @@ export default function Header() {
   return (
     <header className="bg-gray-100 dark:bg-gray-800 py-4">
       <div className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold">
+        <Link href="/" className="text-2xl font-bold text-black">
           Choir Repertoire
         </Link>
         <div className="flex items-center space-x-4">
