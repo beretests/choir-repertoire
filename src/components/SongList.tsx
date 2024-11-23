@@ -19,9 +19,9 @@ export default function SongList({ date }: { date: string }) {
     massParts: boolean;
     psalm: boolean;
   }>({
-    songs: true,
-    massParts: true,
-    psalm: true,
+    songs: false,
+    massParts: false,
+    psalm: false,
   });
 
   // Type the section parameter as a union of keys from visibleSections
@@ -76,7 +76,7 @@ export default function SongList({ date }: { date: string }) {
       {/* Songs Section */}
       <button
         onClick={() => toggleSection("songs")}
-        className="text-md font-semibold w-full text-left px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+        className="text-md font-semibold w-full text-left px-4 py-2 bg-blue-200 dark:bg-blue-600 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors"
       >
         Songs {visibleSections.songs ? "▲" : "▼"}
       </button>
@@ -116,12 +116,12 @@ export default function SongList({ date }: { date: string }) {
       {/* Mass Parts Section */}
       <button
         onClick={() => toggleSection("massParts")}
-        className="text-md font-semibold w-full text-left px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+        className="text-md font-semibold w-full text-left px-4 py-2 bg-purple-200 dark:bg-purple-600 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors mt-8"
       >
         Mass Parts {visibleSections.massParts ? "▲" : "▼"}
       </button>
       {visibleSections.massParts && (
-        <ul>
+        <ul className="space-y-4">
           {songs
             .filter((song) => song.songbook_name.includes("St. Anne's Mass"))
             .map((song) => (
@@ -151,12 +151,12 @@ export default function SongList({ date }: { date: string }) {
       {/* Psalm Section */}
       <button
         onClick={() => toggleSection("psalm")}
-        className="text-md font-semibold w-full text-left px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+        className="text-md font-semibold w-full text-left px-4 py-2 bg-pink-200 dark:bg-pink-600 hover:bg-pink-300 dark:hover:bg-pink-700 transition-colors mt-8"
       >
         Psalm {visibleSections.psalm ? "▲" : "▼"}
       </button>
       {visibleSections.psalm && (
-        <ul>
+        <ul className="space-y-4">
           {songs
             .filter((song) =>
               song.songbook_name.includes("Psalms for Sundays and Solemnities")
