@@ -1,189 +1,144 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
-import RecordingList from "./RecordingList";
-
-interface Song {
-  id: string;
-  songbook_name: string;
-  song_number: string;
-  song_name: string;
-}
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import RecordingList from './RecordingList';
+import { Song } from '@/types';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export default function SongList({ date }: { date: string }) {
   const [songs, setSongs] = useState<Song[]>([]);
   const [selectedSong, setSelectedSong] = useState<string | null>(null);
-  const [visibleSections, setVisibleSections] = useState<{
-    songs: boolean;
-    massParts: boolean;
-    psalm: boolean;
-  }>({
-    songs: false,
-    massParts: false,
-    psalm: false,
-  });
+  const [categories, setCategories] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState<boolean>(true);
+  const colors = [
+    'bg-blue-200 dark:bg-blue-600 hover:bg-blue-300 dark:hover:bg-blue-700',
+    'bg-purple-200 dark:bg-purple-600 hover:bg-purple-300 dark:hover:bg-purple-700',
+    'bg-pink-200 dark:bg-pink-600 hover:bg-pink-300 dark:hover:bg-pink-700',
+    'bg-red-200 dark:bg-red-600 hover:bg-red-300 dark:hover:bg-red-700',
+  ];
 
-  // Type the section parameter as a union of keys from visibleSections
-  const toggleSection = (section: keyof typeof visibleSections) => {
-    setVisibleSections((prev) => ({
+  const toggleSection = (section: keyof typeof categories) => {
+    setCategories((prev) => ({
       ...prev,
       [section]: !prev[section],
     }));
   };
 
-  useEffect(() => {
-    async function fetchSongs() {
-      const { data, error } = await supabase
-        .from("schedule_songs")
-        .select(
-          `
+  async function fetchCategories() {
+    const { data, error } = await supabase.from('song_category').select('name');
+    if (error) {
+      console.error('Error fetching song categories:', error);
+      setLoading(false);
+      return;
+    }
+    if (data) {
+      const result = data.reduce<Record<string, boolean>>((acc, item) => {
+        acc[item.name] = false;
+        return acc;
+      }, {});
+      setCategories(result);
+      setLoading(false);
+    }
+  }
+
+  async function fetchSongs() {
+    const { data, error } = await supabase
+      .from('schedule_songs')
+      .select(
+        `
           songs (
             id,
-            songbook_name,
+            song_name,
             song_number,
-            song_name
+            songbooks (id, name),
+            song_category (id, name)
           ),
           schedules!inner (id)
         `
-        )
-        .eq("schedules.schedule_date", date)
-        .order("songs(song_name)");
+      )
+      .eq('schedules.schedule_date', date)
+      .order('songs(song_name)');
 
-      if (error) {
-        console.error("Error fetching songs:", error);
-        return;
-      }
-
-      if (data) {
-        // Ensure data is correctly typed and mapped
-        const formattedSongs: Song[] = data
-          .map((item: any) => item.songs)
-          .filter((song): song is Song => !!song);
-        setSongs(formattedSongs);
-      }
+    if (error) {
+      console.error('Error fetching songs:', error);
+      setLoading(false);
+      return;
     }
 
+    if (data) {
+      const newData = data.map(({ schedules, ...rest }) => rest);
+      const transformData = (data: any[]): Song[] => {
+        return data.map((item) => ({
+          id: item.songs.id,
+          song_name: item.songs.song_name,
+          song_number: item.songs.song_number,
+          songbooks: item.songs.songbooks,
+          song_category: item.songs.song_category,
+        }));
+      };
+      setSongs(transformData(newData) as unknown as Song[]);
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchCategories();
     fetchSongs();
   }, [date]);
 
-  const excludeSongbooks = [
-    "Psalms for Sundays and Solemnities",
-    "St. Anne's Mass",
-  ];
   return (
-    <div>
-      {/* Songs Section */}
-      <button
-        onClick={() => toggleSection("songs")}
-        className="text-md font-semibold w-full text-left px-4 py-2 bg-blue-200 dark:bg-blue-600 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors"
-      >
-        Songs {visibleSections.songs ? "▲" : "▼"}
-      </button>
-      {visibleSections.songs && (
-        <ul className="space-y-4">
-          {songs
-            .filter(
-              (song) =>
-                !excludeSongbooks.some((songbook) =>
-                  song.songbook_name.includes(songbook)
-                )
-            )
-            .map((song) => (
-              <li
-                key={song.id}
-                className="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden"
-              >
-                <button
-                  onClick={() => setSelectedSong(song.id)}
-                  className="w-full text-left px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-50"
-                >
-                  <h3 className="text-lg font-semibold">{song.song_name}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {song.songbook_name} #{song.song_number}
-                  </p>
-                </button>
-                {selectedSong === song.id && (
-                  <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800">
-                    <RecordingList songId={song.id} songName={song.song_name} />
-                  </div>
-                )}
-              </li>
-            ))}
-        </ul>
-      )}
+    <>
+      {Object.keys(categories).map((category, index) => {
+        const categorySongs = songs.filter((song) => song?.song_category?.name === category);
 
-      {/* Mass Parts Section */}
-      <button
-        onClick={() => toggleSection("massParts")}
-        className="text-md font-semibold w-full text-left px-4 py-2 bg-purple-200 dark:bg-purple-600 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors mt-8"
-      >
-        Mass Parts {visibleSections.massParts ? "▲" : "▼"}
-      </button>
-      {visibleSections.massParts && (
-        <ul className="space-y-4">
-          {songs
-            .filter((song) => song.songbook_name.includes("St. Anne's Mass"))
-            .map((song) => (
-              <li
-                key={song.id}
-                className="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden"
-              >
-                <button
-                  onClick={() => setSelectedSong(song.id)}
-                  className="w-full text-left px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-50"
-                >
-                  <h3 className="text-lg font-semibold">{song.song_name}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {song.songbook_name} #{song.song_number}
-                  </p>
-                </button>
-                {selectedSong === song.id && (
-                  <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800">
-                    <RecordingList songId={song.id} songName={song.song_name} />
-                  </div>
-                )}
-              </li>
-            ))}
-        </ul>
-      )}
-
-      {/* Psalm Section */}
-      <button
-        onClick={() => toggleSection("psalm")}
-        className="text-md font-semibold w-full text-left px-4 py-2 bg-pink-200 dark:bg-pink-600 hover:bg-pink-300 dark:hover:bg-pink-700 transition-colors mt-8"
-      >
-        Psalm {visibleSections.psalm ? "▲" : "▼"}
-      </button>
-      {visibleSections.psalm && (
-        <ul className="space-y-4">
-          {songs
-            .filter((song) =>
-              song.songbook_name.includes("Psalms for Sundays and Solemnities")
-            )
-            .map((song) => (
-              <li
-                key={song.id}
-                className="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden"
-              >
-                <button
-                  onClick={() => setSelectedSong(song.id)}
-                  className="w-full text-left px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-50"
-                >
-                  <h3 className="text-lg font-semibold">{song.song_name}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {song.songbook_name} #{song.song_number}
-                  </p>
-                </button>
-                {selectedSong === song.id && (
-                  <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800">
-                    <RecordingList songId={song.id} songName={song.song_name} />
-                  </div>
-                )}
-              </li>
-            ))}
-        </ul>
-      )}
-    </div>
+        if (categorySongs.length > 0) {
+          return (
+            <div key={category}>
+              {loading ? (
+                <CircularProgress />
+              ) : (
+                <section key={category}>
+                  <button
+                    onClick={() => toggleSection(category)}
+                    className={`text-md font-semibold w-full text-left px-4 py-2 mt-4 transition-colors ${
+                      colors[index % colors.length]
+                    }`}
+                  >
+                    {category.toUpperCase()} {categories.category ? '▲' : '▼'}
+                  </button>
+                  {categories[category] && (
+                    <ul className="space-y-4">
+                      {categorySongs.map((song) => (
+                        <li
+                          key={song.id}
+                          className="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden"
+                        >
+                          <button
+                            onClick={() => setSelectedSong(song.id)}
+                            className="w-full text-left px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-50"
+                          >
+                            <h3 className="text-lg font-semibold">{song.song_name}</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              {song.songbooks.name} #{song.song_number}
+                            </p>
+                          </button>
+                          {selectedSong === song.id && (
+                            <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800">
+                              <RecordingList songId={song.id} songName={song.song_name} />
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              )}
+            </div>
+          );
+        }
+        return null;
+      })}
+    </>
   );
 }
