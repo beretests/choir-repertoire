@@ -1,11 +1,11 @@
 "use client";
 
-import { useAuth } from "./AuthProvider";
+// import { useAuth } from "./AuthProvider";
 import ThemeToggle from "./ThemeToggle";
 import Link from "next/link";
 
 export default function Header() {
-  const { user, signOut } = useAuth();
+  // const { user, signOut } = useAuth();
 
   return (
     <header className="bg-gray-100 dark:bg-gray-800 py-4 px-4 sm:px-6">
@@ -18,7 +18,7 @@ export default function Header() {
         </Link>
         <div className="flex items-right space-x-2 sm:space-x-4">
           <ThemeToggle />
-          {user ? (
+          {/* {user ? (
             <button
               onClick={signOut}
               className="px-3 py-1 sm:px-4 sm:py-2 bg-red-500 text-white text-sm sm:text-base rounded hover:bg-red-600"
@@ -38,9 +38,9 @@ export default function Header() {
                 className="px-3 py-1 sm:px-4 sm:py-2 bg-green-500 text-white text-sm sm:text-base rounded hover:bg-green-600"
               >
                 Sign Up
-              </Link> */}
+              </Link> 
             </>
-          )}
+          )}*/}
         </div>
       </div>
     </header>
