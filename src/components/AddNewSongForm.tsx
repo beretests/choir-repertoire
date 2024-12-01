@@ -100,9 +100,9 @@ const AddNewSongForm: React.FC<AddNewSongFormProps> = ({ onSongAdded }) => {
           {loading ? <CircularProgress /> : 'Add Song'}
         </Button>
       </form>
+      {songId && <RecordingsForm songId={songId} />}
       {error && <p className="text-red-500">{error}</p>}
       {/* <RecordingsForm songId={null} /> */}
-      {songId && <RecordingsForm songId={songId} />}
     </div>
   );
 };
