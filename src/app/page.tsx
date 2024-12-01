@@ -6,7 +6,7 @@ import DateList from '@/components/DateList';
 import SongList from '@/components/SongList';
 import { useState, useRef } from 'react';
 import { Suspense } from 'react';
-import Spinner from '@/components/Spinner';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export default function Home() {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
@@ -28,7 +28,7 @@ export default function Home() {
         <h5 className="text-lg font-semibold mb-4">
           Select a year to view the available repertoire
         </h5>
-        <Suspense fallback={<Spinner />}>
+        <Suspense fallback={<CircularProgress />}>
           <YearList
             onYearSelect={(year) => {
               setSelectedYear(year);
@@ -41,7 +41,7 @@ export default function Home() {
       {selectedYear && (
         <section id="months" ref={monthsRef} className="mb-8">
           <h2 className="text-lg font-semibold mb-4">Select a month</h2>
-          <Suspense fallback={<Spinner />}>
+          <Suspense fallback={<CircularProgress />}>
             <MonthList
               year={selectedYear}
               onMonthSelect={(month) => {
@@ -56,7 +56,7 @@ export default function Home() {
       {selectedMonth !== null && (
         <section id="dates" ref={datesRef} className="mb-8">
           <h2 className="text-lg font-semibold mb-4">Select a date</h2>
-          <Suspense fallback={<Spinner />}>
+          <Suspense fallback={<CircularProgress />}>
             <DateList
               year={selectedYear!}
               month={selectedMonth}
@@ -74,7 +74,7 @@ export default function Home() {
           <h2 className="text-lg font-semibold mb-4">
             Select a song to view the available part recordings
           </h2>
-          <Suspense fallback={<Spinner />}>
+          <Suspense fallback={<CircularProgress />}>
             <SongList date={selectedDate} />
           </Suspense>
         </section>

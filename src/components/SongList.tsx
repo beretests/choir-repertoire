@@ -105,7 +105,7 @@ export default function SongList({ date }: { date: string }) {
                       colors[index % colors.length]
                     }`}
                   >
-                    {category.toUpperCase()} {categories.category ? '▲' : '▼'}
+                    {category.replace(/_/g, ' ').toUpperCase()} {categories.category ? '▲' : '▼'}
                   </button>
                   {categories[category] && (
                     <ul className="space-y-4">
