@@ -84,7 +84,7 @@ export default function RecordingList({ songId, songName }: RecordingListProps) 
               </div>
             </li>
           ))}
-          {user && (
+          {user?.email && (
             <li>
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -96,7 +96,7 @@ export default function RecordingList({ songId, songName }: RecordingListProps) 
           )}
         </ul>
       )}
-      {user && (
+      {user?.email && (
         <AddRecordingModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
