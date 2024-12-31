@@ -1,19 +1,19 @@
 import Link from 'next/link';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+// import { useAuth } from '@/contexts/AuthContext';
+// import { useRouter } from 'next/navigation';
+// import { useEffect } from 'react';
 
 const SchedulesPage: React.FC = () => {
-  const { user } = useAuth();
-  const router = useRouter();
+  // const { user } = useAuth();
+  // const router = useRouter();
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/login');
-    }
-  }, [user, router]);
+  // useEffect(() => {
+  //   if (!user) {
+  //     router.push('/login');
+  //   }
+  // }, [user, router]);
 
-  if (!user) return null;
+  // if (!user) return null;
 
   return (
     <div className="container mx-auto p-4">
