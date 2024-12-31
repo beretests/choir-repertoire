@@ -1,8 +1,9 @@
-'use client';
+// 'use client';
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useRouter } from 'next/navigation';
 
 interface YearListProps {
   onYearSelect: (year: number) => void;
@@ -11,6 +12,7 @@ interface YearListProps {
 export default function YearList({ onYearSelect }: YearListProps) {
   const [years, setYears] = useState<number[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const router = useRouter();
 
   async function fetchYears() {
     const { data, error } = await supabase
@@ -34,6 +36,10 @@ export default function YearList({ onYearSelect }: YearListProps) {
     fetchYears();
   }, []);
 
+  const handleCreateNewSchedule = () => {
+    router.push('/schedules/new');
+  };
+
   return (
     <div className="flex flex-col items-center">
       {loading ? (
@@ -50,6 +56,14 @@ export default function YearList({ onYearSelect }: YearListProps) {
               </button>
             </li>
           ))}
+          <li>
+            <button
+              onClick={handleCreateNewSchedule}
+              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transform hover:scale-105"
+            >
+              Create a new song schedule
+            </button>
+          </li>
         </ul>
       )}
     </div>
