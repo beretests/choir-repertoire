@@ -4,26 +4,19 @@ import YearList from '@/components/YearList';
 import MonthList from '@/components/MonthList';
 import DateList from '@/components/DateList';
 import SongList from '@/components/SongList';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Suspense } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useSearchParams } from 'next/navigation';
 import StatusSnackbar from '../components/StatusSnackbar';
+import SearchParamsHandler from '@/components/SearchParamsHandler';
 
 export default function Home() {
-  const searchParams = useSearchParams();
   const [status, setStatus] = useState<'success' | 'error' | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    const statusParam = searchParams.get('status') as 'success' | 'error' | null;
-    const messageParam = searchParams.get('message');
-
-    if (statusParam && messageParam) {
-      setStatus(statusParam);
-      setMessage(messageParam);
-    }
-  }, [searchParams]);
+  <Suspense fallback={<CircularProgress />}>
+    <SearchParamsHandler setStatus={setStatus} setMessage={setMessage} />
+  </Suspense>;
 
   const handleSnackbarClose = () => {
     setStatus(null);
