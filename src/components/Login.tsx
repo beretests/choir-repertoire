@@ -26,7 +26,7 @@ const Login = () => {
     } catch (error) {
       console.log(`Error ${action === 'login' ? 'signing in' : 'signing up'}: `, error);
       setError(
-        error.message ||
+        (error as Error).message ||
           `Error ${action === 'login' ? 'signing in' : 'signing up'}. Please try again.`
       );
     }
