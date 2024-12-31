@@ -1,44 +1,20 @@
-// import "./globals.css";
-// import { Inter } from "next/font/google";
-// import ThemeProvider from "@/components/ThemeProvider";
+import './globals.css';
+import { Inter } from 'next/font/google';
+import ThemeProvider from '@/contexts/ThemeProvider';
+import { AuthProvider } from '@/contexts/AuthContext';
+import Header from '@/components/Header';
 
-// const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
-// export default function RootLayout({
-//   children,
-// }: {
-//   children: React.ReactNode;
-// }) {
-//   return (
-//     <html lang="en">
-//       <body className={inter.className}>
-//         <ThemeProvider>{children}</ThemeProvider>
-//       </body>
-//     </html>
-//   );
-// }
-
-import "./globals.css";
-import { Inter } from "next/font/google";
-import ThemeProvider from "@/components/ThemeProvider";
-// import { AuthProvider } from "@/components/AuthProvider";
-import Header from "@/components/Header";
-
-const inter = Inter({ subsets: ["latin"] });
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={inter.className}>
         <ThemeProvider>
-          {/* <AuthProvider> */}
-          <Header />
-          {children}
-          {/* </AuthProvider> */}
+          <AuthProvider>
+            <Header />
+            {children}
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

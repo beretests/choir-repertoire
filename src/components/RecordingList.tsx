@@ -1,9 +1,9 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Recording } from '@/types';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useAuth } from '@/contexts/AuthContext';
+import AddRecordingModal from './AddRecordingModal';
 
 interface RecordingListProps {
   songId: string;
@@ -13,12 +13,14 @@ interface RecordingListProps {
 export default function RecordingList({ songId, songName }: RecordingListProps) {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     async function fetchRecordings() {
       const { data, error } = await supabase
         .from('recordings')
-        .select('id, voice_part (name), url')
+        .select(`id, url, voice_part (name)`)
         .eq('song_id', songId);
 
       if (error) {
@@ -82,7 +84,25 @@ export default function RecordingList({ songId, songName }: RecordingListProps) 
               </div>
             </li>
           ))}
+          {user && (
+            <li>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50"
+              >
+                Add new recording
+              </button>
+            </li>
+          )}
         </ul>
+      )}
+      {user && (
+        <AddRecordingModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          songId={songId}
+          onRecordingAdded={(newRecording) => setRecordings([...recordings, newRecording])}
+        />
       )}
     </>
   );
