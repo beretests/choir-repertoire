@@ -69,7 +69,7 @@ export default function NewSongForm({ onSongCreated }: NewSongFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 bg-white px-4 py-4 w-[80%] rounded-lg">
       <TextField
         label="Song Name"
         value={songName}
@@ -78,7 +78,7 @@ export default function NewSongForm({ onSongCreated }: NewSongFormProps) {
         required
       />
       <FormControl fullWidth required>
-        <InputLabel>Songbook</InputLabel>
+        <InputLabel className="select-focused">Songbook</InputLabel>
         <Select value={songbookId} onChange={(e) => setSongbookId(e.target.value)}>
           {songbooks.map((songbook) => (
             <MenuItem key={songbook.id} value={songbook.id}>
@@ -95,11 +95,11 @@ export default function NewSongForm({ onSongCreated }: NewSongFormProps) {
         required
       />
       <FormControl fullWidth required>
-        <InputLabel>Song Category</InputLabel>
+        <InputLabel className="select-focused">Song Category</InputLabel>
         <Select value={songCategoryId} onChange={(e) => setSongCategoryId(e.target.value)}>
           {songCategories.map((category) => (
             <MenuItem key={category.id} value={category.id}>
-              {category.name}
+              {(category.name[0].toUpperCase() + category.name.slice(1)).replace(/_/g, ' ')}
             </MenuItem>
           ))}
         </Select>

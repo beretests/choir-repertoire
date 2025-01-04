@@ -40,11 +40,11 @@ export default function DateList({ year, month, onDateSelect }: DateListProps) {
   }, [year, month]);
 
   return (
-    <div className="flex flex-col items-center">
+    <div>
       {loading ? (
         <CircularProgress />
       ) : (
-        <ul className="flex flex-wrap gap-4">
+        <ul className="mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {dates.map((date) => (
             <li key={date}>
               <button

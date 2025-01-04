@@ -13,6 +13,7 @@ import {
   InputLabel,
 } from '@mui/material';
 import { Recording } from '@/types';
+import { useSnackbar } from '@/contexts/SnackbarContext';
 
 interface AddRecordingModalProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export default function AddRecordingModal({
   songId,
   onRecordingAdded,
 }: AddRecordingModalProps) {
+  const { showSnackbar } = useSnackbar();
   const [file, setFile] = useState<File | null>(null);
   const [voicePart, setVoicePart] = useState<string>('');
   const [voiceParts, setVoiceParts] = useState<{ id: string; name: string }[]>([]);
@@ -46,6 +48,7 @@ export default function AddRecordingModal({
 
     if (voicePartsError) {
       console.error('Error fetching voiceParts:', voicePartsError);
+      showSnackbar(`Error fetching voiceParts: ${voicePartsError}`, 'error');
     } else {
       setVoiceParts(voicePartsData);
     }
@@ -57,7 +60,10 @@ export default function AddRecordingModal({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!file || !voicePart) return;
+    if (!file || !voicePart) {
+      showSnackbar('No file or voice part selected!', 'error');
+      return;
+    }
 
     setUploading(true);
 
@@ -92,9 +98,11 @@ export default function AddRecordingModal({
 
       onRecordingAdded(recordingData);
       onClose();
+      showSnackbar('Recording added successfully', 'success');
     } catch (error) {
       console.error('Error adding recording:', error);
-      alert('Failed to add recording. Please try again.');
+      showSnackbar((error as Error).message, 'error');
+      // alert('Failed to add recording. Please try again.');
     } finally {
       setUploading(false);
     }

@@ -7,7 +7,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useAuth } from '@/contexts/AuthContext';
 import NewSongForm from './NewSongForm';
-import { useRouter } from 'next/navigation';
+import { useSnackbar } from '@/contexts/SnackbarContext';
 
 interface Song {
   id: string;
@@ -16,11 +16,11 @@ interface Song {
 
 export default function NewScheduleForm() {
   const { supabase } = useAuth();
+  const { showSnackbar } = useSnackbar();
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const [selectedSongs, setSelectedSongs] = useState<Song[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [songs, setSongs] = useState<Song[]>([]);
-  const router = useRouter();
 
   const handleDateChange = (date: Date | null) => {
     setScheduleDate(date);
@@ -38,6 +38,10 @@ export default function NewScheduleForm() {
       if (data) {
         setSongs(data);
       }
+
+      if (error) {
+        showSnackbar((error as Error).message, 'error');
+      }
     }
   };
 
@@ -50,7 +54,10 @@ export default function NewScheduleForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!scheduleDate) return;
+    if (!scheduleDate) {
+      showSnackbar('Please select a date for the schedule', 'error');
+      return;
+    }
 
     try {
       // Create new schedule
@@ -77,10 +84,13 @@ export default function NewScheduleForm() {
         throw new Error('Error adding songs to schedule: ' + songError.message);
       }
 
-      // Redirect to home page
-      router.push('/?status=success&message=Schedule created successfully');
+      showSnackbar('Schedule created successfully', 'success');
+      // Reset form
+      setScheduleDate(null);
+      setSelectedSongs([]);
+      setSearchTerm('');
     } catch (error) {
-      router.push(`/?status=error&message=${encodeURIComponent((error as Error).message)}`);
+      showSnackbar((error as Error).message, 'error');
     }
   };
 
@@ -89,11 +99,12 @@ export default function NewScheduleForm() {
   const handleNewSongCreated = (newSong: Song) => {
     setSelectedSongs([...selectedSongs, newSong]);
     setShowNewSongForm(false);
+    showSnackbar(`New song "${newSong.song_name}" added successfully`, 'success');
   };
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 bg-white rounded-lg p-4 w-[80%] mx-auto">
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <DatePicker
             label="Schedule Date"
@@ -108,7 +119,9 @@ export default function NewScheduleForm() {
           getOptionLabel={(option) => option.song_name}
           onInputChange={(event, value) => handleSongSearch(value)}
           onChange={handleSongSelect}
-          renderInput={(params) => <TextField {...params} label="Search Songs" fullWidth />}
+          renderInput={(params) => (
+            <TextField {...params} value={searchTerm} label="Search Songs" fullWidth />
+          )}
         />
 
         <div>
@@ -120,15 +133,22 @@ export default function NewScheduleForm() {
           </ul>
         </div>
 
-        <Button type="button" onClick={() => setShowNewSongForm(true)} variant="outlined">
-          Add New Song
+        <Button
+          type="button"
+          onClick={() => setShowNewSongForm((prev) => !prev)}
+          variant="outlined"
+          className="mr-4"
+        >
+          {showNewSongForm ? 'Cancel' : 'Add New Song'}
         </Button>
 
         <Button type="submit" variant="contained" color="primary">
           Create Schedule
         </Button>
       </form>
-      {showNewSongForm && <NewSongForm onSongCreated={handleNewSongCreated} />}
+      <div className="flex justify-center mt-8">
+        {showNewSongForm && <NewSongForm onSongCreated={handleNewSongCreated} />}
+      </div>
     </>
   );
 }

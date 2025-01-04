@@ -3,32 +3,25 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import CustomAlert from './CustomAlert';
+import { useSnackbar } from '@/contexts/SnackbarContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const router = useRouter();
+  const { showSnackbar } = useSnackbar();
 
-  const handleSubmit = async (e: React.FormEvent, action: 'login' | 'signup') => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
     try {
-      if (action === 'login') {
-        await signIn(email, password);
-      } else {
-        await signUp(email, password);
-      }
+      await signIn(email, password);
+      showSnackbar('Login successful!', 'success');
       router.push('/');
     } catch (error) {
-      console.log(`Error ${action === 'login' ? 'signing in' : 'signing up'}: `, error);
-      setError(
-        (error as Error).message ||
-          `Error ${action === 'login' ? 'signing in' : 'signing up'}. Please try again.`
-      );
+      console.log('Error signing in', error);
+      showSnackbar((error as Error).message || 'Error signing in. Please try again.', 'error');
     }
   };
 
@@ -38,8 +31,7 @@ const Login = () => {
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Sign in to your account
         </h2>
-        {error && <CustomAlert severity="error" title="Error" message={error} />}
-        <form className="mt-8 space-y-6" onSubmit={(e) => handleSubmit(e, 'login')}>
+        <form className="mt-8 space-y-6" onSubmit={(e) => handleSubmit(e)}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email-address" className="sr-only">
@@ -81,13 +73,6 @@ const Login = () => {
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               Sign in
-            </button>
-            <button
-              type="button"
-              onClick={(e) => handleSubmit(e, 'signup')}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-            >
-              Sign up
             </button>
           </div>
         </form>

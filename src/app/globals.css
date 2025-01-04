@@ -19,3 +19,9 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@layer components {
+  .select-focused {
+    @apply bg-white px-1 -translate-y-2 left-3 scale-75 text-custom-blue; 
+  }
+}
