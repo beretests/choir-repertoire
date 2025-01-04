@@ -45,7 +45,7 @@ export default function YearList({ onYearSelect }: YearListProps) {
       {loading ? (
         <CircularProgress />
       ) : (
-        <ul className="mx-auto grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+        <ul className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 last:place-items-center">
           {years.map((year) => (
             <li key={year} className="place-self-center">
               <button
@@ -56,7 +56,7 @@ export default function YearList({ onYearSelect }: YearListProps) {
               </button>
             </li>
           ))}
-          <li className="last:col-span-full last:place-self-center">
+          <li className="last:col-span-full">
             <button
               onClick={handleCreateNewSchedule}
               className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transform hover:scale-105"
