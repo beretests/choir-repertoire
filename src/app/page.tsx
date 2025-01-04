@@ -4,24 +4,22 @@ import YearList from '@/components/YearList';
 import MonthList from '@/components/MonthList';
 import DateList from '@/components/DateList';
 import SongList from '@/components/SongList';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Suspense } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import StatusSnackbar from '../components/StatusSnackbar';
-import SearchParamsHandler from '@/components/SearchParamsHandler';
+// import SearchParamsHandler from '@/components/SearchParamsHandler';
+import { useSnackbar } from '@/contexts/SnackbarContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Home() {
-  const [status, setStatus] = useState<'success' | 'error' | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { showSnackbar } = useSnackbar();
 
-  <Suspense fallback={<CircularProgress />}>
-    <SearchParamsHandler setStatus={setStatus} setMessage={setMessage} />
-  </Suspense>;
-
-  const handleSnackbarClose = () => {
-    setStatus(null);
-    setMessage(null);
-  };
+  useEffect(() => {
+    if (user?.email) {
+      showSnackbar(`Welcome back, ${user?.email}!`, 'success');
+    }
+  }, [user]);
 
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
@@ -36,7 +34,7 @@ export default function Home() {
   };
 
   return (
-    <main className="container mx-auto p-4 min-h-screen bg-white dark:bg-gray-800 text-black dark:text-white">
+    <main className="p-4 px-28 min-h-screen bg-white dark:bg-gray-800 text-black dark:text-white">
       <section id="years" className="mb-8">
         <h1 className="text-2xl font-bold mb-4">Program - Song List</h1>
         <h5 className="text-lg font-semibold mb-4">
@@ -93,7 +91,6 @@ export default function Home() {
           </Suspense>
         </section>
       )}
-      <StatusSnackbar status={status} message={message} onClose={handleSnackbarClose} />
     </main>
   );
 }

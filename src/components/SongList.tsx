@@ -5,12 +5,20 @@ import { supabase } from '@/lib/supabase';
 import RecordingList from './RecordingList';
 import { Song } from '@/types';
 import CircularProgress from '@mui/material/CircularProgress';
+import Button from '@mui/material/Button';
+import NewSongForm from './NewSongForm';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSnackbar } from '@/contexts/SnackbarContext';
 
 export default function SongList({ date }: { date: string }) {
+  const { showSnackbar } = useSnackbar();
   const [songs, setSongs] = useState<Song[]>([]);
   const [selectedSong, setSelectedSong] = useState<string | null>(null);
   const [categories, setCategories] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState<boolean>(true);
+  const { user } = useAuth();
+  const [showNewSongForm, setShowNewSongForm] = useState<string | null>(null);
+
   const colors = [
     'bg-blue-200 dark:bg-blue-600 hover:bg-blue-300 dark:hover:bg-blue-700',
     'bg-purple-200 dark:bg-purple-600 hover:bg-purple-300 dark:hover:bg-purple-700',
@@ -28,6 +36,7 @@ export default function SongList({ date }: { date: string }) {
   async function fetchCategories() {
     const { data, error } = await supabase.from('song_category').select('name');
     if (error) {
+      showSnackbar((error as Error).message, 'error');
       console.error('Error fetching song categories:', error);
       setLoading(false);
       return;
@@ -61,6 +70,7 @@ export default function SongList({ date }: { date: string }) {
       .order('songs(song_name)');
 
     if (error) {
+      showSnackbar((error as Error).message, 'error');
       console.error('Error fetching songs:', error);
       setLoading(false);
       return;
@@ -81,6 +91,39 @@ export default function SongList({ date }: { date: string }) {
       setLoading(false);
     }
   }
+
+  const handleNewSongCreated = async (newSong: { id: string; song_name: string }) => {
+    const { data, error } = await supabase
+      .from('songs')
+      .select('*, songbooks (id, name), song_category (id, name)')
+      .eq('id', newSong.id)
+      .single();
+
+    if (error) {
+      showSnackbar((error as Error).message, 'error');
+      console.error('Error fetching new song data:', error);
+      return;
+    }
+
+    if (data) {
+      showSnackbar(
+        `${data.song_name[0].toUpperCase() + data.song_name.slice(1)} added successfully to ${(
+          data.song_category.name[0].toUpperCase() + data.song_category.name.slice(1)
+        ).replace(/_/g, ' ')}`,
+        'success'
+      );
+      const formattedSong: Song = {
+        id: data.id,
+        song_name: data.song_name,
+        song_number: data.song_number,
+        songbooks: data.songbooks,
+        song_category: data.song_category,
+      };
+
+      setSongs((prevSongs) => [...prevSongs, formattedSong]);
+      setShowNewSongForm(null);
+    }
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -130,7 +173,29 @@ export default function SongList({ date }: { date: string }) {
                           )}
                         </li>
                       ))}
+                      {user?.email && (
+                        <li>
+                          <Button
+                            type="button"
+                            onClick={() =>
+                              setShowNewSongForm(showNewSongForm === category ? null : category)
+                            }
+                            variant="contained"
+                            color="primary"
+                            className="mt-4"
+                          >
+                            {showNewSongForm === category
+                              ? 'Cancel'
+                              : `Add New ${category.replace(/_/g, ' ')}`}
+                          </Button>
+                        </li>
+                      )}
                     </ul>
+                  )}
+                  {user?.email && showNewSongForm === category && (
+                    <div className="mt-4 flex justify-center">
+                      <NewSongForm onSongCreated={handleNewSongCreated} />
+                    </div>
                   )}
                 </section>
               )}

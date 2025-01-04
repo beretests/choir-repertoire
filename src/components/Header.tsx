@@ -3,10 +3,25 @@
 import ThemeToggle from './ThemeToggle';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSnackbar } from '@/contexts/SnackbarContext';
 import { CircularProgress } from '@mui/material';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const { user, loading, logout } = useAuth();
+  const { showSnackbar } = useSnackbar();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      showSnackbar('Logged out successfully', 'success');
+      router.push('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      showSnackbar('Error logging out. Please try again.', 'error');
+    }
+  };
 
   return (
     <header className="bg-gray-100 dark:bg-gray-800 py-4 px-4 sm:px-6">
@@ -17,14 +32,14 @@ export default function Header() {
         >
           CTK Choir
         </Link>
-        <div className="flex items-right space-x-2 sm:space-x-4">
+        <div className="flex items-right space-x-2 sm:space-x-4 items-center">
           {loading ? (
             <CircularProgress />
           ) : user?.email ? (
             <>
               <span className="mr-4">Welcome, {user?.email}</span>
               <button
-                onClick={logout}
+                onClick={() => handleLogout()}
                 className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
               >
                 Log out
@@ -38,12 +53,6 @@ export default function Header() {
                 className="px-3 py-1 sm:px-4 sm:py-2 bg-blue-500 text-white text-sm sm:text-base rounded hover:bg-blue-600"
               >
                 Log In
-              </Link>
-              <Link
-                href="/signup"
-                className="px-3 py-1 sm:px-4 sm:py-2 bg-green-500 text-white text-sm sm:text-base rounded hover:bg-green-600"
-              >
-                Sign Up
               </Link>
             </>
           )}
