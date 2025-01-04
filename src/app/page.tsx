@@ -7,7 +7,6 @@ import SongList from '@/components/SongList';
 import { useState, useRef, useEffect } from 'react';
 import { Suspense } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-// import SearchParamsHandler from '@/components/SearchParamsHandler';
 import { useSnackbar } from '@/contexts/SnackbarContext';
 import { useAuth } from '@/contexts/AuthContext';
 

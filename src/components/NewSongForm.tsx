@@ -60,7 +60,6 @@ export default function NewSongForm({ onSongCreated }: NewSongFormProps) {
       console.error('Error creating song:', error);
     } else if (data) {
       onSongCreated(data[0]);
-      // Reset form
       setSongName('');
       setSongbookId('');
       setSongNumber('');
