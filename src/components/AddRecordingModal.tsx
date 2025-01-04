@@ -76,14 +76,12 @@ export default function AddRecordingModal({
 
       if (uploadError) throw uploadError;
 
-      // Get public URL for the uploaded file
       const { data: urlData } = supabase.storage
         .from('ctk-choir-recordings')
         .getPublicUrl(fileName);
 
       if (!urlData) throw new Error('Failed to get public URL');
 
-      // Add recording details to the database
       const { data: recordingData, error: dbError } = await supabase
         .from('recordings')
         .insert({
@@ -102,7 +100,6 @@ export default function AddRecordingModal({
     } catch (error) {
       console.error('Error adding recording:', error);
       showSnackbar((error as Error).message, 'error');
-      // alert('Failed to add recording. Please try again.');
     } finally {
       setUploading(false);
     }
