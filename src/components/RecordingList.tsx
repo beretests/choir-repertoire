@@ -42,7 +42,7 @@ export default function RecordingList({ songId, songName }: RecordingListProps) 
     }
 
     fetchRecordings();
-  }, [songId]);
+  }, [songId, recordings]);
 
   const handleDownload = (url: string, voicePart: string) => {
     const fileName = `${songName.replace(/\s+/g, '_')}_${voicePart}.mp3`;
