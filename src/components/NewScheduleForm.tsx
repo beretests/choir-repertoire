@@ -60,7 +60,6 @@ export default function NewScheduleForm() {
     }
 
     try {
-      // Create new schedule
       const { data: scheduleData, error: scheduleError } = await supabase
         .from('schedules')
         .insert({ schedule_date: scheduleDate.toISOString() })
@@ -72,7 +71,6 @@ export default function NewScheduleForm() {
 
       const scheduleId = scheduleData[0].id;
 
-      // Add songs to schedule
       const scheduleSongs = selectedSongs.map((song) => ({
         schedule_id: scheduleId,
         song_id: song.id,
@@ -85,7 +83,6 @@ export default function NewScheduleForm() {
       }
 
       showSnackbar('Schedule created successfully', 'success');
-      // Reset form
       setScheduleDate(null);
       setSelectedSongs([]);
       setSearchTerm('');

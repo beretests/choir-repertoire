@@ -1,5 +1,3 @@
-// 'use client';
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -40,22 +38,24 @@ export default function DateList({ year, month, onDateSelect }: DateListProps) {
   }, [year, month]);
 
   return (
-    <div>
+    <div className="flex flex-col items-center">
       {loading ? (
         <CircularProgress />
       ) : (
-        <ul className="mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {dates.map((date) => (
-            <li key={date}>
-              <button
-                onClick={() => onDateSelect(date)}
-                className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-50 transform hover:scale-105"
-              >
-                {new Date(date + 'T00:00:00').toLocaleDateString()}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <div className="mx-auto">
+          <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {dates.map((date) => (
+              <li key={date}>
+                <button
+                  onClick={() => onDateSelect(date)}
+                  className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-50 transform hover:scale-105"
+                >
+                  {new Date(date + 'T00:00:00').toLocaleDateString()}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

@@ -1,5 +1,3 @@
-// 'use client';
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import RecordingList from './RecordingList';
@@ -132,6 +130,7 @@ export default function SongList({ date }: { date: string }) {
 
   return (
     <>
+      <h3 className="text-lg font-semibold mb-4 underline">{date}</h3>
       {Object.keys(categories).map((category, index) => {
         const categorySongs = songs.filter((song) => song?.song_category?.name === category);
 
