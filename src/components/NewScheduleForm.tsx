@@ -122,10 +122,12 @@ export default function NewScheduleForm() {
         />
 
         <div>
-          <h3 className="font-bold mb-2">Selected Songs:</h3>
+          <h3 className="font-bold mb-2 text-black">Selected Songs:</h3>
           <ul>
             {selectedSongs.map((song) => (
-              <li key={song.id}>{song.song_name}</li>
+              <li key={song.id} className="text-black">
+                {song.song_name}
+              </li>
             ))}
           </ul>
         </div>

@@ -11,10 +11,10 @@ const NewSchedulePage: React.FC = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!user?.email) {
       router.push('/login');
     }
-  }, [user, loading]);
+  }, [user]);
 
   if (loading) return <CircularProgress />;
   if (!user) return null;
