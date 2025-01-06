@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-// import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Dialog,
@@ -68,7 +67,6 @@ export default function AddRecordingModal({
     setUploading(true);
 
     try {
-      // Upload file to Supabase Storage
       const fileName = `${songId}_${voicePart}_${Date.now()}.mp3`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('ctk-choir-recordings')

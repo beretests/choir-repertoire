@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { TextField, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { TextField, Button, FormControl, Select, InputLabel, MenuItem } from '@mui/material';
 import { useAuth } from '@/contexts/AuthContext';
+import { Song } from '@/types';
 
 interface NewSongFormProps {
-  onSongCreated: (song: { id: string; song_name: string }) => void;
+  onSongCreated: (song: Song) => void;
 }
 
 export default function NewSongForm({ onSongCreated }: NewSongFormProps) {
