@@ -254,7 +254,7 @@ export default function SongList({ date }: { date: string }) {
           }}
           variant="contained"
           color="primary"
-          className="mt-4"
+          className="mt-8"
         >
           {showSongAutocomplete ? 'Cancel' : 'Add New'}
         </Button>
