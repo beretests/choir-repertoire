@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import RecordingList from './RecordingList';
-import { Song } from '@/types';
+import { Song, Songbook, SongCategory } from '@/types';
 import CircularProgress from '@mui/material/CircularProgress';
 import Button from '@mui/material/Button';
 import NewSongForm from './NewSongForm';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSnackbar } from '@/contexts/SnackbarContext';
+import SongAutocomplete from './SongAutocomplete';
 
 export default function SongList({ date }: { date: string }) {
   const { showSnackbar } = useSnackbar();
@@ -15,7 +16,8 @@ export default function SongList({ date }: { date: string }) {
   const [categories, setCategories] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const { user } = useAuth();
-  const [showNewSongForm, setShowNewSongForm] = useState<string | null>(null);
+  const [showSongAutocomplete, setShowSongAutocomplete] = useState(false);
+  const [showNewSongModal, setShowNewSongModal] = useState(false);
 
   const colors = [
     'bg-blue-200 dark:bg-blue-600 hover:bg-blue-300 dark:hover:bg-blue-700',
@@ -25,10 +27,7 @@ export default function SongList({ date }: { date: string }) {
   ];
 
   const toggleSection = (section: keyof typeof categories) => {
-    setCategories((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
+    setCategories((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
   async function fetchCategories() {
@@ -54,78 +53,141 @@ export default function SongList({ date }: { date: string }) {
       .from('schedule_songs')
       .select(
         `
-          songs (
-            id,
-            song_name,
-            song_number,
-            songbooks (id, name),
-            song_category (id, name)
-          ),
-          schedules!inner (id)
-        `
+        songs (
+          id,
+          song_name,
+          song_number,
+          songbooks (id, name),
+          song_category (id, name)
+        ),
+        schedules!inner (id)
+      `
       )
       .eq('schedules.schedule_date', date)
       .order('songs(song_name)');
 
     if (error) {
       showSnackbar((error as Error).message, 'error');
-      console.error('Error fetching songs:', error);
+      console.error('Error fetching schedule songs:', error);
       setLoading(false);
       return;
     }
 
     if (data) {
-      const newData = data.map(({ schedules, ...rest }) => rest);
       const transformData = (data: any[]): Song[] => {
         return data.map((item) => ({
           id: item.songs.id,
           song_name: item.songs.song_name,
           song_number: item.songs.song_number,
-          songbooks: item.songs.songbooks,
-          song_category: item.songs.song_category,
+          songbooks: item.songs.songbooks as Songbook,
+          song_category: item.songs.song_category as SongCategory,
         }));
       };
-      setSongs(transformData(newData) as unknown as Song[]);
+
+      setSongs(transformData(data));
       setLoading(false);
     }
   }
 
+  const handleAddSong = async (song: Song | null) => {
+    if (song && date) {
+      const { data: scheduleData, error: scheduleError } = await supabase
+        .from('schedules')
+        .select('id')
+        .eq('schedule_date', date)
+        .single();
+
+      if (scheduleError) {
+        showSnackbar((scheduleError as Error).message, 'error');
+        console.error('Error fetching schedule:', scheduleError);
+        return;
+      }
+
+      if (!scheduleData) {
+        showSnackbar('No schedule found for the given date', 'error');
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('schedule_songs')
+        .insert({
+          schedule_id: scheduleData.id,
+          song_id: song.id,
+        })
+        .select('*, songs:song_id (*, songbooks (id, name), song_category (id, name))')
+        .single();
+
+      if (error) {
+        showSnackbar((error as Error).message, 'error');
+        console.error('Error adding song to schedule:', error);
+        return;
+      }
+
+      setSongs([...songs, song]);
+      setShowSongAutocomplete(false);
+      showSnackbar(`${song.song_name} successfully added to the schedule`, 'success');
+    }
+  };
+
   const handleNewSongCreated = async (newSong: { id: string; song_name: string }) => {
+    const { data: scheduleData, error: scheduleError } = await supabase
+      .from('schedules')
+      .select('id')
+      .eq('schedule_date', date)
+      .single();
+
+    if (scheduleError) {
+      showSnackbar((scheduleError as Error).message, 'error');
+      console.error('Error fetching schedule:', scheduleError);
+      return;
+    }
+
+    if (!scheduleData) {
+      showSnackbar('No schedule found for the given date', 'error');
+      return;
+    }
+
     const { data, error } = await supabase
-      .from('songs')
-      .select('*, songbooks (id, name), song_category (id, name)')
-      .eq('id', newSong.id)
+      .from('schedule_songs')
+      .insert({ schedule_id: scheduleData.id, song_id: newSong.id })
+      .select('*, songs:song_id (*, songbooks (id, name), song_category (id, name))')
       .single();
 
     if (error) {
       showSnackbar((error as Error).message, 'error');
-      console.error('Error fetching new song data:', error);
+      console.error('Error adding song to schedule:', error);
       return;
     }
 
     if (data) {
       showSnackbar(
-        `${data.song_name[0].toUpperCase() + data.song_name.slice(1)} added successfully to ${(
-          data.song_category.name[0].toUpperCase() + data.song_category.name.slice(1)
+        `${
+          data.songs.song_name[0].toUpperCase() + data.songs.song_name.slice(1)
+        } added successfully to ${(
+          data.songs.song_category.name[0].toUpperCase() + data.songs.song_category.name.slice(1)
         ).replace(/_/g, ' ')}`,
         'success'
       );
+
       const formattedSong: Song = {
-        id: data.id,
-        song_name: data.song_name,
-        song_number: data.song_number,
-        songbooks: data.songbooks,
-        song_category: data.song_category,
+        id: data.songs.id,
+        song_name: data.songs.song_name,
+        song_number: data.songs.song_number,
+        songbooks: data.songs.songbooks,
+        song_category: data.songs.song_category,
       };
 
       setSongs((prevSongs) => [...prevSongs, formattedSong]);
-      setShowNewSongForm(null);
+      setShowNewSongModal(false);
+      setShowSongAutocomplete(false);
     }
   };
 
   useEffect(() => {
-    fetchCategories();
-    fetchSongs();
+    if (user?.email) {
+      fetchCategories();
+      fetchSongs();
+    } else return;
   }, [date]);
 
   return (
@@ -172,29 +234,7 @@ export default function SongList({ date }: { date: string }) {
                           )}
                         </li>
                       ))}
-                      {user?.email && (
-                        <li>
-                          <Button
-                            type="button"
-                            onClick={() =>
-                              setShowNewSongForm(showNewSongForm === category ? null : category)
-                            }
-                            variant="contained"
-                            color="primary"
-                            className="mt-4"
-                          >
-                            {showNewSongForm === category
-                              ? 'Cancel'
-                              : `Add New ${category.replace(/_/g, ' ')}`}
-                          </Button>
-                        </li>
-                      )}
                     </ul>
-                  )}
-                  {user?.email && showNewSongForm === category && (
-                    <div className="mt-4 flex justify-center">
-                      <NewSongForm onSongCreated={handleNewSongCreated} />
-                    </div>
                   )}
                 </section>
               )}
@@ -203,6 +243,38 @@ export default function SongList({ date }: { date: string }) {
         }
         return null;
       })}
+      {user?.email && (
+        <Button
+          type="button"
+          onClick={() => {
+            setShowSongAutocomplete((prevState) => !prevState);
+            if (showNewSongModal) {
+              setShowNewSongModal(false);
+            }
+          }}
+          variant="contained"
+          color="primary"
+          className="mt-4"
+        >
+          {showSongAutocomplete ? 'Cancel' : 'Add New'}
+        </Button>
+      )}
+      {user?.email && showSongAutocomplete && (
+        <div className="mt-4 p-4 bg-white">
+          <SongAutocomplete
+            onSongSelect={handleAddSong}
+            onAddNew={() => {
+              // setShowSongAutocomplete(false);
+              setShowNewSongModal(true);
+            }}
+          />
+        </div>
+      )}
+      {user?.email && showNewSongModal && (
+        <div className="mt-4 flex justify-center bg-white">
+          <NewSongForm onSongCreated={handleNewSongCreated} />
+        </div>
+      )}
     </>
   );
 }
