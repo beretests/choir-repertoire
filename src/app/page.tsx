@@ -35,7 +35,7 @@ export default function Home() {
   return (
     <main className="p-4 lg:px-28 min-h-screen bg-white dark:bg-gray-800 text-black dark:text-white">
       <section id="years" className="mb-8">
-        <h1 className="text-2xl font-bold mb-4">Program - Song List</h1>
+        <h1 className="text-2xl font-bold mb-4 mt-4">Program - Song List</h1>
         <h5 className="text-lg font-semibold mb-4">
           Select a year to view the available repertoire
         </h5>
