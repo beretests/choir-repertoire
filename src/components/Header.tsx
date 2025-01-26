@@ -26,7 +26,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-gray-100 dark:bg-gray-800 py-4 sm:px-6">
+    <header className="bg-gray-100 dark:bg-[#141A24] py-4 sm:px-6">
       <div className="mx-auto flex flex-col sm:flex-row items-center">
         <Link
           href="/"
@@ -40,6 +40,7 @@ export default function Header() {
           ) : user?.email ? (
             <>
               <span className="mr-4">Welcome, {user?.email}</span>
+              <ThemeToggle />
               <button
                 onClick={() => handleLogout()}
                 className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
